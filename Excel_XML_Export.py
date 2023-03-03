@@ -1,5 +1,4 @@
 import openpyxl
-import copy
 
 class Pos :
     def __init__(self):
