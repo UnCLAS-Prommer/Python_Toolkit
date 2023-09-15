@@ -6,7 +6,13 @@ def download(name):
         print(returncode)
         print("FFmpeg error.")
     else:
-        os.system("ffmpeg -protocol_whitelist concat,file,http,https,tcp,tls,crypto -i tmp.m3u8 -c copy " + name + ".mp4")
+        returncode = os.system("ffmpeg -protocol_whitelist concat,file,http,https,tcp,tls,crypto -i tmp.m3u8 -c copy " + name + ".mp4")
+        if (returncode == 0):
+            os.remove("tmp.m3u8")
+        else:
+            print(returncode)
+            print("FFmpeg error.")
+            os.remove("tmp.m3u8")
 def fetchm3u8(url,confusion):
     if(confusion == -1):
         try:
