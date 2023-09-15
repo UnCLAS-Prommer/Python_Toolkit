@@ -49,15 +49,3 @@ def init():
     fetchm3u8(url,url.find("confusion_index"))
     download(name)
 init()
-'''
-try:
-    data = 
-except Exception as e:
-    print(e)
-returncode = os.system("ffmpeg -i \"" + pos + "\"" + " -c copy /Users/shichunyan/Desktop/qiangji/" + name + ".mp4")
-if(returncode == 0):
-    os.system("terminal-notifier -message \"Download Completed: " + name + "\" -title \"Qianji Downloader\"")
-else:
-    os.system("terminal-notifier -message \"Download Failed: " + name + "\" -title \"Qianji Downloader\"")
-sys.exit()
-'''
