@@ -1,4 +1,7 @@
 import openpyxl
+from xls2xlsx import XLS2XLSX
+import os
+del_flag = False
 
 class Pos :
     def __init__(self):
@@ -24,14 +27,26 @@ def get_merge_range(sheet):
         merged_ranges.append(mergecell)
     return merged_ranges
 
+def getfile(filepath):
+    filename = "Unknown"
+    if filepath.find("\\") != -1:
+        filename = filepath.split("\\")[-1]
+    elif filepath.find("/") != -1:
+        filename = filepath.split("/")[-1]
+    else:
+        filename = filepath
+    if(filename.find('"') != -1):
+        filename = filename[:-1]
+    return filename
+
 filepath = input("File Path: ")
-filename = "Unknown"
-if filepath.find("\\") != -1:
-    filename = filepath.split("\\")[-1]
-elif filepath.find("/") != -1:
-    filename = filepath.split("/")[-1]
-else:
-    filename = filepath
+filename = getfile(filepath)
+if(filename[-3:]=="xls"):
+    tmpfile = "tmp.xlsx"
+    x2x = XLS2XLSX(filename)
+    x2x.to_xlsx(tmpfile)
+    filepath = "H:\\resources\\Programs\\tmp.xlsx"
+    del_flag = True
 output = open(filename + ".html", "w",encoding = "utf8")
 document = openpyxl.load_workbook(filepath,data_only=True)
 worksheet = document.active
@@ -53,15 +68,15 @@ for row in worksheet.iter_rows():
                 written = True
                 if cell.column == mergecell.start.column and cell.row == mergecell.start.row:
                     if ChangeFlag:
-                        output_string += '<td class="y" rowspan = "' + str(mergecell.rowrange) + '" colspan = "' + str(mergecell.columnrange) + '">' + str(cell.value) + '</td>\n'
+                        output_string += '<td class="y" rowspan = "' + str(mergecell.rowrange) + '" colspan = "' + str(mergecell.columnrange) + '">' + str(cell.value if cell.value != None else "") + '</td>\n'
                     else:
-                        output_string += '<td class="g" rowspan = "' + str(mergecell.rowrange) + '" colspan = "' + str(mergecell.columnrange) + '">' + str(cell.value) + '</td>\n'
+                        output_string += '<td class="g" rowspan = "' + str(mergecell.rowrange) + '" colspan = "' + str(mergecell.columnrange) + '">' + str(cell.value if cell.value != None else "") + '</td>\n'
                     # output.write('<td rowspan = "' + str(mergecell.rowrange) + '" colspan = "' + str(mergecell.columnrange) + '">' + str(cell.value) + '</td>\n')
         if not written:
             if ChangeFlag:
-                output_string += '<td class="y">' + str(cell.value) + '</td>\n'
+                output_string += '<td class="y">' + str(cell.value if cell.value != None else "") + '</td>\n'
             else:
-                output_string += '<td class="g">' + str(cell.value) + '</td>\n'
+                output_string += '<td class="g">' + str(cell.value if cell.value != None else "") + '</td>\n'
             # output.write("<td>" + str(cell.value) + "</td>\n")
         cols += 1
     # if cols > maxcols:
@@ -69,3 +84,7 @@ for row in worksheet.iter_rows():
     output.write(output_string + '</tr>\n')
     ChangeFlag = not ChangeFlag
 output.write("</table>\n</body>\n</html>")
+try:
+    os.remove("H:\\resources\\Programs\\tmp.xlsx")
+except:
+    None
