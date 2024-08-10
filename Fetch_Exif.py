@@ -7,7 +7,10 @@ def OutputFileTime(BaseFilePath):
         try:
             img = Image.open(BaseFilePath + "\\" + i)
             exif_dict = img.getexif()
-            print(exif_dict[306])
+            if (306 in exif_dict):
+                print(i + " Time: " + exif_dict[306])
+            else:
+                print(i + " have no time info.")
         except Exception as e:
             print(e)
 register_heif_opener()
