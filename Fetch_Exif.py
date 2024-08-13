@@ -11,9 +11,8 @@ def GetExifData(i, img):
             print(i + " have no time info.")
     else:
         exif_dict = piexif.load(img.info["exif"])
-        print(exif_dict['Exif'])
         if(36867 in exif_dict['Exif']):
-            print(i + " Time: " + exif_dict['Exif'][36867])
+            print(i + " Time: " + str(exif_dict['Exif'][36867]))
         else:
             print(i + " have no time info.")
 def OutputFileTime(BaseFilePath):
@@ -24,7 +23,7 @@ def OutputFileTime(BaseFilePath):
             GetExifData(i, img)
             img.close()
         except Exception as e:
-            print(e)
+            print("File " + i + " met an error: " + str(e))
 register_heif_opener()
-BaseFilePath = sys.argv[1]
+BaseFilePath = "G:\\照片与录像\\杂乱的"
 OutputFileTime(BaseFilePath)
