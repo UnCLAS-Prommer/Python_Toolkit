@@ -25,5 +25,5 @@ def OutputFileTime(BaseFilePath):
         except Exception as e:
             print("File " + i + " met an error: " + str(e))
 register_heif_opener()
-BaseFilePath = "G:\\照片与录像\\杂乱的"
+BaseFilePath = sys.argv[1]
 OutputFileTime(BaseFilePath)
