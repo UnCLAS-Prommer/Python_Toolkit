@@ -37,15 +37,86 @@ def is_our_window_active():  # sourcery skip: use-contextlib-suppress
     return False
 
 
+def check_adb_connection():
+    try:
+        result = subprocess.run(
+            ["adb", "get-state"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=3,
+            encoding="utf-8"
+        )
+        if result.returncode == 0 and "device" in result.stdout:
+            return True
+        print("未检测到已连接的ADB设备，请检查ADB连接。")
+        return False
+    except Exception as e:
+        print(f"ADB检测异常: {e}")
+        return False
+
+
 def on_press(key):
     if not is_our_window_active():
         return
     try:
         # 捕获所有可打印字符（包括符号）
         if hasattr(key, "char") and key.char is not None:
-            print(f"捕获到: {key.char}")
-            send_adb_text(key.char)
-        # 检查特殊按键
+            special_escape = {'&', '?', '#', '*', '(', ')', '|', ';', '<', '>', '$', '\\', '"', "'"}            
+            if key.char == "'":
+                print("捕获到: 单引号")
+                send_adb_text('\\' + "'")  # 转义单引号
+            elif key.char == '"':
+                print("捕获到: 双引号")
+                send_adb_text('\\"')  # 转义双引号
+            elif key.char == ";":
+                print("捕获到: 分号")
+                send_adb_text('\\;')  # 转义分号
+            elif key.char == ":":
+                print("捕获到: 冒号")
+                send_adb_text('\\:')  # 转义冒号
+            elif key.char == ",":
+                print("捕获到: 逗号")
+                send_adb_text('\\,')  # 转义逗号
+            elif key.char == ".":
+                print("捕获到: 句号")
+                send_adb_text('\\.')  # 转义句号
+            elif key.char == "<":
+                print("捕获到: 小于号")
+                send_adb_text('\\<')  # 转义小于号
+            elif key.char == ">":
+                print("捕获到: 大于号")
+                send_adb_text('\\>')  # 转义大于号
+            elif key.char == " ":
+                print("捕获到: 空格")
+                send_adb_keyevent(62)  # Android SPACE
+            elif key.char in special_escape:
+                print(f"捕获到: 特殊符号 {key.char}")
+                send_adb_text('\\' + key.char)
+            else:
+                print(f"捕获到: {key.char}")
+                send_adb_text(key.char)
+        elif hasattr(key, "vk"):
+            # 小键盘数字区间通常为 96~105
+            if 96 <= key.vk <= 105:
+                num = str(key.vk - 96)
+                print(f"捕获到: 小键盘数字 {num}")
+                send_adb_text(num)
+            elif key.vk == 110:  # Numpad .
+                print("捕获到: 小键盘小数点")
+                send_adb_text('.')
+            elif key.vk == 107:  # Numpad +
+                print("捕获到: 小键盘加号")
+                send_adb_text('+')
+            elif key.vk == 109:  # Numpad -
+                print("捕获到: 小键盘减号")
+                send_adb_text('-')
+            elif key.vk == 106:  # Numpad *
+                print("捕获到: 小键盘乘号")
+                send_adb_text('*')
+            elif key.vk == 111:  # Numpad /
+                print("捕获到: 小键盘除号")
+                send_adb_text('/')
+        # 捕获其他特殊按键
         elif key == keyboard.Key.space:
             print("捕获到: Space")
             send_adb_keyevent(62)  # Android SPACE
@@ -84,12 +155,16 @@ def on_press(key):
         print(f"捕获到特殊键: {key}")
 
 
-listener = keyboard.Listener(on_press=on_press)
-listener.start()
+if __name__ == "__main__":
+    if not check_adb_connection():
+        exit(1)
 
-try:
-    while listener.is_alive():
-        time.sleep(0.01)
-except KeyboardInterrupt:
-    print("监听已中断。")
-    listener.stop()
+    listener = keyboard.Listener(on_press=on_press)
+    listener.start()
+
+    try:
+        while listener.is_alive():
+            time.sleep(0.01)
+    except KeyboardInterrupt:
+        print("监听已中断。")
+        listener.stop()
